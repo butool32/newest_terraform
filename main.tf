@@ -1,60 +1,60 @@
 provider "aws" {
-region = "us-east-1"
+  region = var.aws_region
 }
  
 resource "aws_vpc" "main_vpc" {
-cidr_block = "10.0.0.0/16"
-enable_dns_support = true
-enable_dns_hostnames = true
+  cidr_block           = var.vpc_cidr
+  enable_dns_support   = true
+  enable_dns_hostnames = true
  
-tags = {
-Name = "Terraform-VPC"
-}
+  tags = {
+    Name = var.vpc_name
+  }
 }
  
 resource "aws_subnet" "public_subnet" {
-vpc_id = aws_vpc.main_vpc.id
-cidr_block = "10.0.1.0/24"
-map_public_ip_on_launch = true
-availability_zone = "us-east-1a"
+  vpc_id                  = aws_vpc.main_vpc.id
+  cidr_block              = var.subnet_cidr
+  map_public_ip_on_launch = true
+  availability_zone       = var.availability_zone
  
-tags = {
-Name = "Terraform-public-subnet"
-}
+  tags = {
+    Name = var.subnet_name
+  }
 }
  
 resource "aws_internet_gateway" "gw" {
-vpc_id = aws_vpc.main_vpc.id
+  vpc_id = aws_vpc.main_vpc.id
  
-tags = {
-Name = "Terraform-internet-gateway"
-}
+  tags = {
+    Name = var.igw_name
+  }
 }
  
 resource "aws_route_table" "public_rt" {
-vpc_id = aws_vpc.main_vpc.id
+  vpc_id = aws_vpc.main_vpc.id
  
-route {
-cidr_block = "0.0.0.0/0"
-gateway_id = aws_internet_gateway.gw.id
-}
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.gw.id
+  }
  
-tags = {
-Name = "Terraform-route-table"
-}
+  tags = {
+    Name = var.route_table_name
+  }
 }
  
 resource "aws_route_table_association" "public_assoc" {
-subnet_id = aws_subnet.public_subnet.id
-route_table_id = aws_route_table.public_rt.id
+  subnet_id      = aws_subnet.public_subnet.id
+  route_table_id = aws_route_table.public_rt.id
 }
  
 resource "aws_s3_bucket" "terraform_bucket" {
-bucket = "terraform-demo-bucket-assignment2"
-force_destroy = true
+  bucket        = var.bucket_name
+  force_destroy = true
  
-tags = {
-Name = "Terraform-S3-bucket"
-Environment = "Dev"
-}
+  tags = {
+    Name        = var.bucket_tag_name
+    Environment = var.environment
+  }
 }
